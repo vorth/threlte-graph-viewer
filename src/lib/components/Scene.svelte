@@ -1,20 +1,40 @@
 <script>
   import { T } from '@threlte/core'
-  import { ContactShadows, Float, Grid, OrbitControls } from '@threlte/extras'
+  import { ContactShadows, Grid, OrbitControls } from '@threlte/extras'
+  import { interactivity } from '@threlte/extras'
+
+  import Graph from './Graph.svelte';
+
+  interactivity()
+
+  let smallScale = 0.07;
+  let largeScale = 0.14;
+  let small = true;
+  $: scale = small? smallScale : largeScale;
+
+  const changeScale = () => small = !small;
+
+  const phi = ( 1 + Math.sqrt(5) ) / 2;
+  
+  const K5 = {
+    vertices: [
+      [ 1, 1, 1 ],
+      [ 1/phi, phi, 0 ],
+      [ -1/phi, phi, 0 ],
+      [ -1, 1, 1 ],
+      [ 0, 1/phi, phi ],
+    ],
+    edges: [
+      [ 0, 1 ], [ 1, 2 ], [ 3, 2 ], [ 3, 4 ], [ 4, 0 ],
+      [ 0, 2 ], [ 0, 3 ], [ 1, 3 ], [ 1, 4 ], [ 2, 4 ]
+    ],
+  }
+
+  let graph=K5;
 </script>
 
-<T.PerspectiveCamera
-  makeDefault
-  position={[-10, 10, 10]}
-  fov={15}
->
-  <OrbitControls
-    autoRotate
-    enableZoom={false}
-    enableDamping
-    autoRotateSpeed={0.5}
-    target.y={1.5}
-  />
+<T.PerspectiveCamera makeDefault position={[2,3,4]} fov={35} >
+  <OrbitControls />
 </T.PerspectiveCamera>
 
 <T.DirectionalLight
@@ -28,9 +48,9 @@
   position.y={-0.001}
   cellColor="#ffffff"
   sectionColor="#ffffff"
-  sectionThickness={0}
-  fadeDistance={25}
-  cellSize={2}
+  sectionThickness={1}
+  fadeDistance={125}
+  cellSize={1}
 />
 
 <ContactShadows
@@ -40,42 +60,13 @@
   opacity={0.5}
 />
 
-<Float
-  floatIntensity={1}
-  floatingRange={[0, 1]}
+<T.Mesh
+  position={[-1.4, 1.5, 0.75]}
+  on:click={changeScale}
+  scale={0.3}
 >
-  <T.Mesh
-    position.y={1.2}
-    position.z={-0.75}
-  >
-    <T.BoxGeometry />
-    <T.MeshStandardMaterial color="#0059BA" />
-  </T.Mesh>
-</Float>
+  <T.DodecahedronGeometry />
+  <T.MeshStandardMaterial color="#F8EBCE" />
+</T.Mesh>
 
-<Float
-  floatIntensity={1}
-  floatingRange={[0, 1]}
->
-  <T.Mesh
-    position={[1.2, 1.5, 0.75]}
-    rotation.x={5}
-    rotation.y={71}
-  >
-    <T.TorusKnotGeometry args={[0.5, 0.15, 100, 12, 2, 3]} />
-    <T.MeshStandardMaterial color="#F85122" />
-  </T.Mesh>
-</Float>
-
-<Float
-  floatIntensity={1}
-  floatingRange={[0, 1]}
->
-  <T.Mesh
-    position={[-1.4, 1.5, 0.75]}
-    rotation={[-5, 128, 10]}
-  >
-    <T.IcosahedronGeometry />
-    <T.MeshStandardMaterial color="#F8EBCE" />
-  </T.Mesh>
-</Float>
+<Graph nodeScale={scale} {graph} />
